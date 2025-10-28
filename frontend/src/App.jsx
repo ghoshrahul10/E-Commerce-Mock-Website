@@ -1,5 +1,6 @@
 import React from 'react';
-import ProductList from './components/ProductList'; // Import the new component
+import ProductList from './components/ProductList';
+import Cart from './components/Cart'; // 1. Import the Cart component
 
 function App() {
   return (
@@ -8,7 +9,9 @@ function App() {
         <h1>Vibe Commerce</h1>
       </header>
       <main>
-        <ProductList /> {/* Add the component here */}
+        <ProductList />
+        <hr /> {/* Add a horizontal line to separate them */}
+        <Cart /> {/* 2. Add the Cart component here */}
       </main>
     </div>
   );
