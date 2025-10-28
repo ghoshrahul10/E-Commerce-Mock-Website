@@ -7,9 +7,7 @@ function Cart() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showCheckout, setShowCheckout] = useState(false);
-  const [receipt, setReceipt] = useState(null); // NEW: Receipt state lives here
-
-  // Define fetchCart
+  const [receipt, setReceipt] = useState(null); 
   const fetchCart = async () => {
     try {
       setLoading(true);
@@ -23,9 +21,8 @@ function Cart() {
       setLoading(false);
     }
   };
-
   useEffect(() => {
-    fetchCart(); // Fetch on initial load
+    fetchCart(); 
 
     const handleCartUpdate = () => {
       fetchCart();
@@ -37,7 +34,6 @@ function Cart() {
       window.removeEventListener('cartUpdated', handleCartUpdate);
     };
   }, []);
-
   const handleRemoveItem = async (itemId) => {
     try {
       await axios.delete(`http://localhost:5000/api/cart/${itemId}`);
@@ -46,16 +42,11 @@ function Cart() {
       console.error("Error removing item:", err);
     }
   };
-
-  // NEW: This function is called by the CheckoutForm on success
   const handleCheckoutSuccess = (receiptData) => {
-    setReceipt(receiptData);    // 1. Set the receipt to show it
-    setShowCheckout(false);   // 2. Hide the checkout form
-    fetchCart();              // 3. Refetch the (now empty) cart data
+    setReceipt(receiptData);    
+    setShowCheckout(false);   
+    fetchCart();              
   };
-
-  // --- Render Logic ---
-
   if (loading) {
     return <div>Loading cart...</div>;
   }
@@ -63,8 +54,6 @@ function Cart() {
   if (error) {
     return <div>{error}</div>;
   }
-
-  // NEW: If we have a receipt, show it first.
   if (receipt) {
     return (
       <div className="receipt-modal">
@@ -77,15 +66,13 @@ function Cart() {
           </div>
         ))}
         <p><strong>Total Paid: ${receipt.total.toFixed(2)}</strong></p>
-        {/* Button to clear the receipt and show the empty cart */}
+        {}
         <button onClick={() => setReceipt(null)}>
           Back to Shop
         </button>
       </div>
     );
   }
-
-  // If we are in checkout mode, show the form
   if (showCheckout) {
     return (
       <CheckoutForm 
@@ -96,8 +83,6 @@ function Cart() {
       />
     );
   }
-
-  // Show empty cart message
   if (!cart || cart.items.length === 0) {
     return (
       <div className="cart">
@@ -106,8 +91,6 @@ function Cart() {
       </div>
     );
   }
-
-  // Show cart items
   return (
     <div className="cart">
       <h2>Shopping Cart</h2>

@@ -1,21 +1,15 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-
-// This component now takes two functions as props
 function CheckoutForm({ cartItems, cartTotal, onCheckoutSuccess, onCancel }) {
   const [formData, setFormData] = useState({ name: '', email: '' });
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
-
-  // Updates the form data as the user types
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prevData => ({ ...prevData, [name]: value }));
   };
-
-  // Handles the form submission
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Stop the page from reloading
+    e.preventDefault(); 
     setSubmitting(true);
     setError(null);
 
@@ -25,12 +19,7 @@ function CheckoutForm({ cartItems, cartTotal, onCheckoutSuccess, onCancel }) {
         total: cartTotal,
         customer: formData
       });
-      
-      // On success, call the function from the parent
       onCheckoutSuccess(response.data);
-      // It no longer fires a 'cartUpdated' event
-      // It no longer sets its own receipt state
-
     } catch (err) {
       console.error("Checkout error:", err);
       setError("Checkout failed. Please try again.");
@@ -38,8 +27,6 @@ function CheckoutForm({ cartItems, cartTotal, onCheckoutSuccess, onCancel }) {
       setSubmitting(false);
     }
   };
-
-  // This component ONLY renders the form. The receipt is now handled by the parent.
   return (
     <div className="checkout-form">
       <h3>Checkout</h3>

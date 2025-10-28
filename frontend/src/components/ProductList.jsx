@@ -22,9 +22,6 @@ function ProductList() {
     };
     fetchProducts();
   }, []);
-
-  // --- NEW FUNCTION ---
-  // This function will be called when a button is clicked
   const handleAddToCart = async (productId) => {
     try {
       await axios.post('http://localhost:5000/api/cart', {
@@ -32,9 +29,6 @@ function ProductList() {
         qty: 1
       });
       console.log(`Product ${productId} added to cart`);
-      
-      // --- THIS IS THE NEW LINE ---
-      // Create and dispatch a custom event
       window.dispatchEvent(new CustomEvent('cartUpdated'));
 
     } catch (err) {
