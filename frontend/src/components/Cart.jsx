@@ -7,8 +7,9 @@ function Cart() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showCheckout, setShowCheckout] = useState(false);
+  const [receipt, setReceipt] = useState(null); // NEW: Receipt state lives here
 
-  // Define fetchCart once
+  // Define fetchCart
   const fetchCart = async () => {
     try {
       setLoading(true);
@@ -26,7 +27,6 @@ function Cart() {
   useEffect(() => {
     fetchCart(); // Fetch on initial load
 
-    // This listener just refetches the cart data
     const handleCartUpdate = () => {
       fetchCart();
     };
@@ -47,6 +47,13 @@ function Cart() {
     }
   };
 
+  // NEW: This function is called by the CheckoutForm on success
+  const handleCheckoutSuccess = (receiptData) => {
+    setReceipt(receiptData);    // 1. Set the receipt to show it
+    setShowCheckout(false);   // 2. Hide the checkout form
+    fetchCart();              // 3. Refetch the (now empty) cart data
+  };
+
   // --- Render Logic ---
 
   if (loading) {
@@ -57,14 +64,35 @@ function Cart() {
     return <div>{error}</div>;
   }
 
-  // Show checkout form if 'showCheckout' is true
+  // NEW: If we have a receipt, show it first.
+  if (receipt) {
+    return (
+      <div className="receipt-modal">
+        <h3>Thank you for your order!</h3>
+        <p>A receipt (ID: {receipt.id}) has been sent.</p>
+        <h4>Order Summary:</h4>
+        {receipt.items.map(item => (
+          <div key={item.id}>
+            {item.name} (x{item.quantity}) - ${item.itemTotal.toFixed(2)}
+          </div>
+        ))}
+        <p><strong>Total Paid: ${receipt.total.toFixed(2)}</strong></p>
+        {/* Button to clear the receipt and show the empty cart */}
+        <button onClick={() => setReceipt(null)}>
+          Back to Shop
+        </button>
+      </div>
+    );
+  }
+
+  // If we are in checkout mode, show the form
   if (showCheckout) {
     return (
       <CheckoutForm 
         cartItems={cart.items} 
         cartTotal={cart.total}
-        // This prop lets the form close itself
-        onClose={() => setShowCheckout(false)} 
+        onCheckoutSuccess={handleCheckoutSuccess}
+        onCancel={() => setShowCheckout(false)}
       />
     );
   }

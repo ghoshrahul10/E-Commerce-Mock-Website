@@ -1,32 +1,35 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-function CheckoutForm({ cartItems, cartTotal, onClose }) {
+// This component now takes two functions as props
+function CheckoutForm({ cartItems, cartTotal, onCheckoutSuccess, onCancel }) {
   const [formData, setFormData] = useState({ name: '', email: '' });
-  const [receipt, setReceipt] = useState(null); // Will hold our receipt
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
+  // Updates the form data as the user types
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prevData => ({ ...prevData, [name]: value }));
   };
 
+  // Handles the form submission
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault(); // Stop the page from reloading
     setSubmitting(true);
     setError(null);
 
     try {
-      // Send correct payload: { cartItems, total }
       const response = await axios.post('http://localhost:5000/api/checkout', {
         cartItems: cartItems,
-        total: cartTotal, // Use 'total' as expected by the backend
+        total: cartTotal,
         customer: formData
       });
-
-      setReceipt(response.data); // Show the receipt
-      window.dispatchEvent(new CustomEvent('cartUpdated')); // Tell cart to empty
+      
+      // On success, call the function from the parent
+      onCheckoutSuccess(response.data);
+      // It no longer fires a 'cartUpdated' event
+      // It no longer sets its own receipt state
 
     } catch (err) {
       console.error("Checkout error:", err);
@@ -36,32 +39,7 @@ function CheckoutForm({ cartItems, cartTotal, onClose }) {
     }
   };
 
-  // --- Render Logic ---
-
-  // 1. If we have a receipt, show it!
-  if (receipt) {
-    return (
-      <div className="receipt-modal">
-        <h3>Thank you for your order, {formData.name}!</h3>
-        <p>A receipt (ID: {receipt.id}) has been sent to {formData.email}.</p>
-        <h4>Order Summary:</h4>
-        {receipt.items.map(item => (
-          <div key={item.id}>
-            {item.name} (x{item.quantity}) - ${item.itemTotal.toFixed(2)}
-          </div>
-        ))}
-        <p><strong>Total Paid: ${receipt.total.toFixed(2)}</strong></p>
-        <p>Timestamp: {new Date(receipt.timestamp).toLocaleString()}</p>
-        
-        {/* Button to close the receipt and go back to the cart */}
-        <button onClick={onClose}>
-          Back to Shop
-        </button>
-      </div>
-    );
-  }
-
-  // 2. If no receipt, show the form
+  // This component ONLY renders the form. The receipt is now handled by the parent.
   return (
     <div className="checkout-form">
       <h3>Checkout</h3>
@@ -91,7 +69,11 @@ function CheckoutForm({ cartItems, cartTotal, onClose }) {
         <button type="submit" disabled={submitting}>
           {submitting ? 'Placing Order...' : 'Place Order'}
         </button>
-        {error && <p className="error">{error}</p>}
+        {/* Add a cancel button */}
+        <button type="button" onClick={onCancel} style={{ marginLeft: '10px' }}>
+          Cancel
+        </button>
+        {error && <p className="error" style={{ color: 'red' }}>{error}</p>}
       </form>
     </div>
   );
