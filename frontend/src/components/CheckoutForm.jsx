@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import axios from 'axios';
 
 // This component needs to know what's in the cart, so we'll pass it as a prop
-function CheckoutForm({ cartItems, cartTotal }) {
+// NEW (add onClose)
+function CheckoutForm({ cartItems, cartTotal, onClose }) {
   const [formData, setFormData] = useState({ name: '', email: '' });
   const [receipt, setReceipt] = useState(null); // Will hold our receipt
   const [error, setError] = useState(null);
@@ -45,22 +46,28 @@ function CheckoutForm({ cartItems, cartTotal }) {
   // --- Render Logic ---
 
   // 1. If we have a receipt, show it!
-  if (receipt) {
-    return (
-      <div className="receipt-modal">
-        <h3>Thank you for your order, {formData.name}!</h3>
-        <p>A receipt (ID: {receipt.id}) has been sent to {formData.email}.</p>
-        <h4>Order Summary:</h4>
-        {receipt.items.map(item => (
-          <div key={item.id}>
-            {item.name} (x{item.quantity}) - ${item.itemTotal.toFixed(2)}
-          </div>
-        ))}
-        <p><strong>Total Paid: ${receipt.total.toFixed(2)}</strong></p>
-        <p>Timestamp: {new Date(receipt.timestamp).toLocaleString()}</p>
-      </div>
-    );
-  }
+  // NEW
+if (receipt) {
+  return (
+    <div className="receipt-modal">
+      <h3>Thank you for your order, {formData.name}!</h3>
+      <p>A receipt (ID: {receipt.id}) has been sent to {formData.email}.</p>
+      <h4>Order Summary:</h4>
+      {receipt.items.map(item => (
+        <div key={item.id}>
+          {item.name} (x{item.quantity}) - ${item.itemTotal.toFixed(2)}
+        </div>
+      ))}
+      <p><strong>Total Paid: ${receipt.total.toFixed(2)}</strong></p>
+      <p>Timestamp: {new Date(receipt.timestamp).toLocaleString()}</p>
+
+      {/* --- ADD THIS BUTTON --- */}
+      <button onClick={onClose}>
+        Back to Shop
+      </button>
+    </div>
+  );
+}
 
   // 2. If no receipt, show the form
   return (

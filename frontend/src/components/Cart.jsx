@@ -25,10 +25,10 @@ function Cart() {
 
     fetchCart();
 
-    const handleCartUpdate = () => {
-      fetchCart();
-      setShowCheckout(false); // If cart updates, hide checkout form
-    };
+    // NEW
+const handleCartUpdate = () => {
+  fetchCart(); 
+};
     
     window.addEventListener('cartUpdated', handleCartUpdate);
     
@@ -57,14 +57,17 @@ function Cart() {
   }
 
   // 3. NEW: If showCheckout is true, render the form
-  if (showCheckout) {
-    return (
-      <CheckoutForm 
-        cartItems={cart.items} 
-        cartTotal={cart.total} 
-      />
-    );
-  }
+  // NEW
+if (showCheckout) {
+  return (
+    <CheckoutForm 
+      cartItems={cart.items} 
+      cartTotal={cart.total}
+      // This new prop will let the form close itself
+      onClose={() => setShowCheckout(false)} 
+    />
+  );
+}
 
   if (!cart || cart.items.length === 0) {
     return (
