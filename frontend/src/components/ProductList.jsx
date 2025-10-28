@@ -35,9 +35,6 @@ function ProductList() {
       console.error("Error adding to cart:", err);
     }
   };
-  
-  // --- RENDER LOGIC ---
-
   if (loading) {
     return <div>Loading products...</div>;
   }
@@ -46,16 +43,22 @@ function ProductList() {
     return <div>{error}</div>;
   }
 
+  // ...
   return (
     <div className="product-list">
       <h2>Products</h2>
       <div className="product-grid">
         {products.map(product => (
           <div key={product.id} className="product-card">
+            {}
+            <img 
+              src={product.imageUrl} 
+              alt={product.name} 
+              className="product-image" 
+            />
+            {}
             <h3>{product.name}</h3>
             <p>${product.price.toFixed(2)}</p>
-            {/* --- UPDATED BUTTON --- */}
-            {/* Add the onClick handler here */}
             <button onClick={() => handleAddToCart(product.id)}>
               Add to Cart
             </button>
