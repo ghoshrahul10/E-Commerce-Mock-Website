@@ -1,34 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import CheckoutForm from './CheckoutForm'; // 1. Import the new component
+import CheckoutForm from './CheckoutForm';
 
 function Cart() {
   const [cart, setCart] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showCheckout, setShowCheckout] = useState(false); // 2. Add state for checkout
+  const [showCheckout, setShowCheckout] = useState(false);
+
+  // Define fetchCart once
+  const fetchCart = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get('http://localhost:5000/api/cart');
+      setCart(response.data);
+      setError(null);
+    } catch (err) {
+      console.error("Error fetching cart:", err);
+      setError("Failed to load cart.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchCart = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get('http://localhost:5000/api/cart');
-        setCart(response.data);
-        setError(null);
-      } catch (err) {
-        console.error("Error fetching cart:", err);
-        setError("Failed to load cart.");
-      } finally {
-        setLoading(false);
-      }
+    fetchCart(); // Fetch on initial load
+
+    // This listener just refetches the cart data
+    const handleCartUpdate = () => {
+      fetchCart();
     };
-
-    fetchCart();
-
-    // NEW
-const handleCartUpdate = () => {
-  fetchCart(); 
-};
     
     window.addEventListener('cartUpdated', handleCartUpdate);
     
@@ -56,19 +57,19 @@ const handleCartUpdate = () => {
     return <div>{error}</div>;
   }
 
-  // 3. NEW: If showCheckout is true, render the form
-  // NEW
-if (showCheckout) {
-  return (
-    <CheckoutForm 
-      cartItems={cart.items} 
-      cartTotal={cart.total}
-      // This new prop will let the form close itself
-      onClose={() => setShowCheckout(false)} 
-    />
-  );
-}
+  // Show checkout form if 'showCheckout' is true
+  if (showCheckout) {
+    return (
+      <CheckoutForm 
+        cartItems={cart.items} 
+        cartTotal={cart.total}
+        // This prop lets the form close itself
+        onClose={() => setShowCheckout(false)} 
+      />
+    );
+  }
 
+  // Show empty cart message
   if (!cart || cart.items.length === 0) {
     return (
       <div className="cart">
@@ -78,7 +79,7 @@ if (showCheckout) {
     );
   }
 
-  // 4. OLD: This is the normal cart view
+  // Show cart items
   return (
     <div className="cart">
       <h2>Shopping Cart</h2>
@@ -94,7 +95,6 @@ if (showCheckout) {
         </div>
       ))}
       <h3>Total: ${cart.total.toFixed(2)}</h3>
-      {/* 5. Update this button to toggle the state */}
       <button onClick={() => setShowCheckout(true)}>
         Proceed to Checkout
       </button>
