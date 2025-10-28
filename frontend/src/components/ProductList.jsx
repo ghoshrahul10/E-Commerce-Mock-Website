@@ -27,16 +27,18 @@ function ProductList() {
   // This function will be called when a button is clicked
   const handleAddToCart = async (productId) => {
     try {
-      // Send a POST request to our backend
       await axios.post('http://localhost:5000/api/cart', {
         productId: productId,
-        qty: 1 // We'll just add 1 at a time
+        qty: 1
       });
-      // You could add a success message here, e.g., alert('Item added!')
       console.log(`Product ${productId} added to cart`);
+      
+      // --- THIS IS THE NEW LINE ---
+      // Create and dispatch a custom event
+      window.dispatchEvent(new CustomEvent('cartUpdated'));
+
     } catch (err) {
       console.error("Error adding to cart:", err);
-      // You could show an error to the user here
     }
   };
   

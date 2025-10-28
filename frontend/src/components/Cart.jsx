@@ -58,6 +58,38 @@ function Cart() {
     );
   }
 
+  // --- ADD THIS NEW FUNCTION above the 'return' ---
+  const handleRemoveItem = async (itemId) => {
+    try {
+      await axios.delete(`http://localhost:5000/api/cart/${itemId}`);
+      console.log(`Item ${itemId} removed`);
+      // "Shout" that the cart was updated, so we refetch
+      window.dispatchEvent(new CustomEvent('cartUpdated'));
+    } catch (err) {
+      console.error("Error removing item:", err);
+    }
+  };
+
+  // --- Render Logic ---
+
+  if (loading) {
+    return <div>Loading cart...</div>;
+  }
+  // ... (keep the 'if (error)' and 'if (!cart)' blocks as they are) ...
+  if (error) {
+    return <div>{error}</div>;
+  }
+
+  if (!cart || cart.items.length === 0) {
+    return (
+      <div className="cart">
+        <h2>Shopping Cart</h2>
+        <p>Your cart is empty.</p>
+      </div>
+    );
+  }
+
+  // --- REPLACE YOUR OLD 'return' BLOCK WITH THIS ---
   return (
     <div className="cart">
       <h2>Shopping Cart</h2>
@@ -67,7 +99,10 @@ function Cart() {
           <p>Price: ${item.price.toFixed(2)}</p>
           <p>Quantity: {item.quantity}</p>
           <p>Subtotal: ${item.itemTotal.toFixed(2)}</p>
-          <button>Remove</button>
+          {/* --- ADD THE onClick HANDLER --- */}
+          <button onClick={() => handleRemoveItem(item.id)}>
+            Remove
+          </button>
         </div>
       ))}
       <h3>Total: ${cart.total.toFixed(2)}</h3>
