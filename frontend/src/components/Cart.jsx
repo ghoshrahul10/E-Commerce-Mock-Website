@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import CheckoutForm from './CheckoutForm'; // 1. Import the new component
 
 function Cart() {
-  const [cart, setCart] = useState(null); // Will hold { items: [], total: 0 }
+  const [cart, setCart] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showCheckout, setShowCheckout] = useState(false); // 2. Add state for checkout
 
   useEffect(() => {
-    // This function fetches the cart data
     const fetchCart = async () => {
       try {
         setLoading(true);
@@ -23,47 +24,22 @@ function Cart() {
     };
 
     fetchCart();
-    
-    // We'll also listen for a custom event to refetch the cart
-    // This allows other components to tell this one to update
+
     const handleCartUpdate = () => {
       fetchCart();
+      setShowCheckout(false); // If cart updates, hide checkout form
     };
     
     window.addEventListener('cartUpdated', handleCartUpdate);
     
-    // Cleanup: remove the event listener when component unmounts
     return () => {
       window.removeEventListener('cartUpdated', handleCartUpdate);
     };
+  }, []);
 
-  }, []); // The empty array [] means this runs once on mount
-
-  // --- Render Logic ---
-
-  if (loading) {
-    return <div>Loading cart...</div>;
-  }
-
-  if (error) {
-    return <div>{error}</div>;
-  }
-
-  if (!cart || cart.items.length === 0) {
-    return (
-      <div className="cart">
-        <h2>Shopping Cart</h2>
-        <p>Your cart is empty.</p>
-      </div>
-    );
-  }
-
-  // --- ADD THIS NEW FUNCTION above the 'return' ---
   const handleRemoveItem = async (itemId) => {
     try {
       await axios.delete(`http://localhost:5000/api/cart/${itemId}`);
-      console.log(`Item ${itemId} removed`);
-      // "Shout" that the cart was updated, so we refetch
       window.dispatchEvent(new CustomEvent('cartUpdated'));
     } catch (err) {
       console.error("Error removing item:", err);
@@ -75,9 +51,19 @@ function Cart() {
   if (loading) {
     return <div>Loading cart...</div>;
   }
-  // ... (keep the 'if (error)' and 'if (!cart)' blocks as they are) ...
+
   if (error) {
     return <div>{error}</div>;
+  }
+
+  // 3. NEW: If showCheckout is true, render the form
+  if (showCheckout) {
+    return (
+      <CheckoutForm 
+        cartItems={cart.items} 
+        cartTotal={cart.total} 
+      />
+    );
   }
 
   if (!cart || cart.items.length === 0) {
@@ -89,7 +75,7 @@ function Cart() {
     );
   }
 
-  // --- REPLACE YOUR OLD 'return' BLOCK WITH THIS ---
+  // 4. OLD: This is the normal cart view
   return (
     <div className="cart">
       <h2>Shopping Cart</h2>
@@ -99,14 +85,16 @@ function Cart() {
           <p>Price: ${item.price.toFixed(2)}</p>
           <p>Quantity: {item.quantity}</p>
           <p>Subtotal: ${item.itemTotal.toFixed(2)}</p>
-          {/* --- ADD THE onClick HANDLER --- */}
           <button onClick={() => handleRemoveItem(item.id)}>
             Remove
           </button>
         </div>
       ))}
       <h3>Total: ${cart.total.toFixed(2)}</h3>
-      <button>Checkout</button>
+      {/* 5. Update this button to toggle the state */}
+      <button onClick={() => setShowCheckout(true)}>
+        Proceed to Checkout
+      </button>
     </div>
   );
 }
