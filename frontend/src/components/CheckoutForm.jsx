@@ -24,7 +24,7 @@ function CheckoutForm({ cartItems, cartTotal }) {
       // Call the checkout API, sending the cart data and form data
       const response = await axios.post('http://localhost:5000/api/checkout', {
         cartItems: cartItems,
-        total: cartTotal,
+        total: cartTotal, 
         customer: formData
       });
 
