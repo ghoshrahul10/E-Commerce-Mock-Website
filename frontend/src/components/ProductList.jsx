@@ -20,9 +20,27 @@ function ProductList() {
         setLoading(false);
       }
     };
-
     fetchProducts();
   }, []);
+
+  // --- NEW FUNCTION ---
+  // This function will be called when a button is clicked
+  const handleAddToCart = async (productId) => {
+    try {
+      // Send a POST request to our backend
+      await axios.post('http://localhost:5000/api/cart', {
+        productId: productId,
+        qty: 1 // We'll just add 1 at a time
+      });
+      // You could add a success message here, e.g., alert('Item added!')
+      console.log(`Product ${productId} added to cart`);
+    } catch (err) {
+      console.error("Error adding to cart:", err);
+      // You could show an error to the user here
+    }
+  };
+  
+  // --- RENDER LOGIC ---
 
   if (loading) {
     return <div>Loading products...</div>;
@@ -40,7 +58,11 @@ function ProductList() {
           <div key={product.id} className="product-card">
             <h3>{product.name}</h3>
             <p>${product.price.toFixed(2)}</p>
-            <button>Add to Cart</button>
+            {/* --- UPDATED BUTTON --- */}
+            {/* Add the onClick handler here */}
+            <button onClick={() => handleAddToCart(product.id)}>
+              Add to Cart
+            </button>
           </div>
         ))}
       </div>
